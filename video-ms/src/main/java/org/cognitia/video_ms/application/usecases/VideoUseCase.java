@@ -3,11 +3,11 @@ package org.cognitia.video_ms.application.usecases;
 import org.cognitia.video_ms.application.gateways.S3Gateway;
 import org.cognitia.video_ms.application.gateways.VideoGateway;
 import org.cognitia.video_ms.domain.entity.Video;
-import org.cognitia.video_ms.domain.exceptions.InvalidVideoContentTypeException;
+import org.cognitia.video_ms.domain.exceptions.InvalidVideoThumbUploadException;
 import org.cognitia.video_ms.domain.exceptions.InvalidVideoUploadException;
-import org.cognitia.video_ms.domain.exceptions.handlers.VideoConvertionException;
-import org.cognitia.video_ms.infra.dto.video.UploadVideoRequest;
-import org.cognitia.video_ms.infra.dto.video.VideoMetadataDto;
+import org.cognitia.video_ms.domain.exceptions.VideoConvertionException;
+import org.cognitia.video_ms.domain.exceptions.VideoNotFoundException;
+import org.cognitia.video_ms.infra.dto.video.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class VideoUseCase {
         this.s3Gateway = s3Gateway;
     }
 
-    public String uploadVideo(UploadVideoRequest uploadVideoRequest){
+    public UploadVideoResponse uploadVideo(UploadVideoRequest uploadVideoRequest){
         VideoMetadataDto metadata = uploadVideoRequest.metadata();
 
         if(
@@ -59,12 +59,24 @@ public class VideoUseCase {
         log.info("Video path atual " + videoPath);
         log.info("Duracao atual " + duration);
 
+        new Thread(() -> {
+            var mpegPath = convertToMpegDash(videoPath.toPath());
+
+            log.info("Video converted to mpeg dash " + mpegPath);
+
+            s3Gateway.uploadVideoToBucket(mpegPath, uploadVideoRequest.metadata().courseId(), uploadVideoRequest.video().getOriginalFilename());
+        }).start();
+
+        var url = s3Gateway.getUrlByPrefix(metadata.courseId() + "/" + uploadVideoRequest.video().getOriginalFilename());
+
         var video = new Video(
                 metadata.title(),
                 metadata.description(),
+                uploadVideoRequest.video().getOriginalFilename(),
                 metadata.path(),
                 metadata.skill(),
                 duration,
+                url,
                 null,
                 metadata.courseId()
         );
@@ -73,15 +85,37 @@ public class VideoUseCase {
             videoGateway.upload(video);
         }).start();
 
-        var mpegPath = convertToMpegDash(videoPath.toPath());
+        return new UploadVideoResponse(video);
+    }
 
-        log.info("Video converted to mpeg dash " + mpegPath);
+    public UploadVideoThumbResponse uploadVideoThumb(UploadVideoThumbRequest request){
+        var metadata = request.metadata();
+        var originalName = request.image().getOriginalFilename();
+
+        if(metadata.videoId() == null || metadata.userId() == null){
+            throw new InvalidVideoThumbUploadException("Invalid data while uploading the video thumb");
+        }
+
+        var video = videoGateway.findById(metadata.videoId());
+
+        if(video == null){
+            throw new VideoNotFoundException("Could not found the video while uploading his thumb");
+        }
+
+        var thumbUrl = s3Gateway.getUrlByPrefix(video.courseId() + "/" + video.originalName() + "/" + request.image().getOriginalFilename());
 
         new Thread(() -> {
-            s3Gateway.uploadFileToBucket(mpegPath, uploadVideoRequest.metadata().courseId());
+            s3Gateway.uploadThumbToBucket(
+                    request.image(),
+                    video.courseId(),
+                    video.originalName()
+            );
+
+            videoGateway.uploadThumb(metadata.videoId(), thumbUrl);
+
         }).start();
 
-        return s3Gateway.getVideoUrl("public/" + metadata.courseId() + "/" + mpegPath.getFileName());
+        return new UploadVideoThumbResponse(thumbUrl);
     }
 
     private Path convertToMpegDash(Path path){

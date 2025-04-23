@@ -1,5 +1,6 @@
 package org.cognitia.video_ms.infra.gateways;
 
+import jakarta.transaction.Transactional;
 import org.cognitia.video_ms.application.gateways.VideoGateway;
 import org.cognitia.video_ms.domain.entity.Video;
 import org.cognitia.video_ms.infra.dto.video.DeleteVideoRequestDto;
@@ -25,6 +26,25 @@ public class VideoRepositoryGateway implements VideoGateway {
         var videoEntity = videoMapper.toEntity(video);
 
         videoJpaRepository.save(videoEntity);
+    }
+
+    @Override
+    public Video findById(Long id) {
+        var videoEntity = videoJpaRepository.findById(id);
+
+        if(videoEntity.isEmpty()) return null;
+
+        return videoMapper.toDomain(videoEntity.get());
+    }
+
+    @Transactional
+    @Override
+    public void uploadThumb(Long videoId, String thumbUrl) {
+        var videoEntity = videoJpaRepository.findById(videoId);
+
+        videoEntity.get().setThumbUrl(thumbUrl);
+
+        videoJpaRepository.save(videoEntity.get());
     }
 
     @Override

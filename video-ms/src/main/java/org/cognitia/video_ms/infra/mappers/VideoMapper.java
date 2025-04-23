@@ -12,10 +12,12 @@ public class VideoMapper {
         return VideoEntity.builder()
                 .title(video.title())
                 .description(video.description())
+                .originalName(video.originalName())
                 .skill(video.skill())
                 .path(video.path())
                 .duration(video.duration())
                 .courseId(video.courseId())
+                .chunksUrl(video.chunksUrl())
                 .thumbUrl(video.thumbUrl())
                 .build();
     }
@@ -24,9 +26,11 @@ public class VideoMapper {
         return new Video(
                 videoEntity.getTitle(),
                 videoEntity.getDescription(),
+                videoEntity.getOriginalName(),
                 videoEntity.getPath(),
                 videoEntity.getSkill(),
                 videoEntity.getDuration(),
+                videoEntity.getChunksUrl(),
                 videoEntity.getThumbUrl(),
                 videoEntity.getCourseId()
         );

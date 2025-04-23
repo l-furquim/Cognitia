@@ -4,11 +4,13 @@ import org.cognitia.video_ms.application.gateways.S3Gateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ public class S3Service implements S3Gateway {
         this.s3Client = s3Client;
     }
 
-    public void uploadFileToBucket(Path video, Long courseId){
+    public void uploadVideoToBucket(Path video, Long courseId, String videoName){
         try {
             File[] files = video.toFile().listFiles();
 
@@ -37,7 +39,7 @@ public class S3Service implements S3Gateway {
 
             for (File file : files) {
                 if (file.isFile()) {
-                    String key = "public/" + courseId + "/" + video.getFileName() + file.getName();
+                    String key = "public/" + courseId + "/" + videoName + "/" + file.getName();
 
                     PutObjectRequest put = PutObjectRequest.builder()
                             .bucket(BUCKET)
@@ -53,8 +55,27 @@ public class S3Service implements S3Gateway {
             log.info("Video chunks uploaded with sucess");
         } catch (Exception e) {
             log.error("Error while uploading video files to bucket: " + e.getMessage(), e);
+        }
     }
-}
+
+    public void uploadThumbToBucket(MultipartFile thumb, Long courseId, String videoName){
+        try{
+            PutObjectRequest put = PutObjectRequest.builder()
+                    .bucket(BUCKET)
+                    .contentType(thumb.getContentType())
+                    .contentLength(thumb.getSize())
+                    .key("public/" + courseId + "/" + videoName + "/" + thumb.getOriginalFilename())
+                    .build();
+
+            s3Client.putObject(
+                    put,
+                    RequestBody.fromBytes(thumb.getBytes())
+            );
+
+        }catch (IOException e){
+            log.error("Error while uploading a video thumb " + e.getMessage());
+        }
+    }
 
     public List<String> getVideoUrlsFromCourse(Long courseId){
         List<String> videoUrls = new ArrayList<>();
@@ -79,8 +100,8 @@ public class S3Service implements S3Gateway {
         return videoUrls;
     }
 
-    public String getVideoUrl(String prefix){
-        return DEFAULT_URL + prefix;
+    public String getUrlByPrefix(String prefix){
+        return DEFAULT_URL + "public/" + prefix;
     }
 
     public void deleteObjectFromBucket(String objectKey){

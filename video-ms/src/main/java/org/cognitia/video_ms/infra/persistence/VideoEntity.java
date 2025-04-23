@@ -19,11 +19,15 @@ public class VideoEntity {
 
     private String description;
 
+    private String originalName;
+
     private Long path;
 
     private String skill;
 
     private Double duration;
+
+    private String chunksUrl;
 
     private String thumbUrl;
 

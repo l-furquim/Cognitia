@@ -1,9 +1,9 @@
 package org.cognitia.video_ms.infra.controllers.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.cognitia.video_ms.application.usecases.VideoUseCase;
 import org.cognitia.video_ms.infra.controllers.VideoController;
-import org.cognitia.video_ms.infra.dto.video.UploadVideoRequest;
-import org.cognitia.video_ms.infra.dto.video.VideoMetadataDto;
+import org.cognitia.video_ms.infra.dto.video.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequestMapping("v1/api/videos")
 public class VideoControllerImpl implements VideoController {
@@ -22,13 +23,24 @@ public class VideoControllerImpl implements VideoController {
     }
 
     @PostMapping
-    public ResponseEntity<String> uploadVideo(
+    public ResponseEntity<UploadVideoResponse> uploadVideo(
             @RequestPart VideoMetadataDto data,
             @RequestPart MultipartFile video
     ){
-        var url = videoUseCase.uploadVideo(new UploadVideoRequest(data, video));
+        var response = videoUseCase.uploadVideo(new UploadVideoRequest(data, video));
 
-        return ResponseEntity.status(204).body(url);
+        return ResponseEntity.status(201).body(response);
+    }
+
+
+    @PostMapping("/thumb")
+    public ResponseEntity<UploadVideoThumbResponse> uploadVideoThumb(
+            @RequestPart UploadVideoThumbMetadataDto data,
+            @RequestPart MultipartFile image
+    ){
+        var url = videoUseCase.uploadVideoThumb(new UploadVideoThumbRequest(data, image));
+
+        return ResponseEntity.ok().body(url);
     }
 
 
