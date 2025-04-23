@@ -2,10 +2,8 @@ package org.cognitia.video_ms.application.usecases;
 
 import org.cognitia.video_ms.application.gateways.S3Gateway;
 import org.cognitia.video_ms.application.gateways.VideoGateway;
-import org.cognitia.video_ms.domain.entity.Video;
-import org.cognitia.video_ms.domain.exceptions.InvalidVideoThumbUploadException;
-import org.cognitia.video_ms.domain.exceptions.InvalidVideoUploadException;
-import org.cognitia.video_ms.domain.exceptions.VideoNotFoundException;
+import org.cognitia.video_ms.domain.model.Video;
+import org.cognitia.video_ms.domain.exceptions.*;
 import org.cognitia.video_ms.infra.dto.video.*;
 import org.cognitia.video_ms.utils.FileUtils;
 import org.slf4j.Logger;
@@ -113,6 +111,33 @@ public class VideoUseCase {
 
         return new UploadVideoThumbResponse(thumbUrl);
     }
+
+    public GetCourseVideosResponse getCourseVideos(Long courseId){
+        if(courseId == null){
+            throw new InvalidCurseVideosRequestException("Invalid curse id for searching the videos");
+        }
+
+        var videos = videoGateway.getByCourseId(courseId);
+
+        return new GetCourseVideosResponse(videos);
+    }
+
+    public void deleteVideo(DeleteVideoRequestDto deleteVideoRequestDto){
+        if(deleteVideoRequestDto.videoId() == null){
+            throw new InvalidVideoDeletionException("Cannot delete a video with a null id");
+        }
+
+        videoGateway.delete(deleteVideoRequestDto);
+    }
+
+    public Video updateVideo(UpdateVideoMetadataRequest request){
+        if(request.videoId() == null){
+            throw new InvalidVideoUpdateException("Video id is null, cannot update");
+        }
+
+        return videoGateway.update(request);
+    }
+
 
 
 }

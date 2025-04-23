@@ -2,13 +2,15 @@ package org.cognitia.video_ms.infra.gateways;
 
 import jakarta.transaction.Transactional;
 import org.cognitia.video_ms.application.gateways.VideoGateway;
-import org.cognitia.video_ms.domain.entity.Video;
+import org.cognitia.video_ms.domain.model.Video;
 import org.cognitia.video_ms.infra.dto.video.DeleteVideoRequestDto;
 import org.cognitia.video_ms.infra.dto.video.GetVideoRequestDto;
-import org.cognitia.video_ms.infra.dto.video.UploadVideoResponse;
+import org.cognitia.video_ms.infra.dto.video.UpdateVideoMetadataRequest;
 import org.cognitia.video_ms.infra.mappers.VideoMapper;
 import org.cognitia.video_ms.infra.persistence.repository.VideoJpaRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class VideoRepositoryGateway implements VideoGateway {
@@ -49,11 +51,52 @@ public class VideoRepositoryGateway implements VideoGateway {
 
     @Override
     public void delete(DeleteVideoRequestDto deleteVideoRequestDto) {
+        var video = videoJpaRepository.findById(deleteVideoRequestDto.videoId());
 
+        if(video.isEmpty()) return;
+
+        videoJpaRepository.delete(video.get());
     }
 
     @Override
     public String get(GetVideoRequestDto getVideoRequestDto) {
         return "";
+    }
+
+    @Override
+    public List<Video> getByCourseId(Long courseId) {
+        var videos = videoJpaRepository.getByCourseId(courseId);
+
+        return videos.stream().map(
+                videoMapper::toDomain
+        ).toList();
+    }
+
+    @Transactional
+    @Override
+    public Video update(UpdateVideoMetadataRequest request) {
+        var videoEntity = videoJpaRepository.findById(request.videoId());
+
+        if(!videoEntity.isEmpty()){
+            if(request.title() != null){
+                videoEntity.get().setTitle(request.title());
+            }
+
+            if(request.description() != null){
+                videoEntity.get().setDescription(request.description());
+            }
+
+            if(request.path() != null){
+                videoEntity.get().setPath(request.path());
+            }
+
+            if(request.skill() != null){
+                videoEntity.get().setSkill(request.skill());
+            }
+
+
+            videoJpaRepository.save(videoEntity.get());
+        }
+        return videoMapper.toDomain(videoEntity.get());
     }
 }

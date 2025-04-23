@@ -1,6 +1,6 @@
 package org.cognitia.video_ms.infra.dto.video;
 
-import org.cognitia.video_ms.domain.entity.Video;
+import org.cognitia.video_ms.domain.model.Video;
 
 import java.util.List;
 

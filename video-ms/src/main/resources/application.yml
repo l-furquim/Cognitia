@@ -8,9 +8,9 @@ spring:
       max-request-size: 10GB
   application:
     name: video-ms
-#  redis:
-#    host: redis
-#    port: 6379
+  redis:
+    host: redis
+    port: 6379
   datasource:
     url: jdbc:postgresql://localhost:5432/cognitia
     username: root

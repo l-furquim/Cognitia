@@ -2,6 +2,7 @@ package org.cognitia.video_ms.infra.controllers.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.cognitia.video_ms.application.usecases.VideoUseCase;
+import org.cognitia.video_ms.domain.model.Video;
 import org.cognitia.video_ms.infra.controllers.VideoController;
 import org.cognitia.video_ms.infra.dto.video.*;
 import org.springframework.http.ResponseEntity;
@@ -40,11 +41,26 @@ public class VideoControllerImpl implements VideoController {
         return ResponseEntity.ok().body(url);
     }
 
-    @GetMapping("{courseId}")
+    @GetMapping("/course/{courseId}")
     public ResponseEntity<GetCourseVideosResponse> getCourseVideos(@PathVariable("courseId")Long courseId){
-        
+        var videos = videoUseCase.getCourseVideos(courseId);
+
+        return ResponseEntity.ok().body(videos);
     }
 
+    @DeleteMapping("/video/{videoId}")
+    public ResponseEntity<Void> deleteVideo(@PathVariable("videoId") Long videoId){
+        videoUseCase.deleteVideo(new DeleteVideoRequestDto(videoId));
+
+        return ResponseEntity.status(204).build();
+    }
+
+    @PutMapping
+    public ResponseEntity<Video> updateVideoMetadata(@RequestBody UpdateVideoMetadataRequest request){
+        var video = videoUseCase.updateVideo(request);
+
+        return ResponseEntity.ok().body(video);
+    }
 
 
 }

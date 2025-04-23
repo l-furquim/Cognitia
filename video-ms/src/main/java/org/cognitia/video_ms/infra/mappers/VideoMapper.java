@@ -1,6 +1,6 @@
 package org.cognitia.video_ms.infra.mappers;
 
-import org.cognitia.video_ms.domain.entity.Video;
+import org.cognitia.video_ms.domain.model.Video;
 import org.cognitia.video_ms.infra.persistence.VideoEntity;
 import org.springframework.stereotype.Component;
 

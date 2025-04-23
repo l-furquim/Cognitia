@@ -1,4 +1,4 @@
-package org.cognitia.video_ms.domain.entity;
+package org.cognitia.video_ms.domain.model;
 
 public record Video(
         String title,

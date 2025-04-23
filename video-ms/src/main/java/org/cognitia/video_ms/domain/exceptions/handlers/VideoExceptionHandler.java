@@ -82,6 +82,48 @@ public class VideoExceptionHandler {
         return ResponseEntity.status(response.status()).body(response);
     }
 
+    @ExceptionHandler(exception = InvalidCurseVideosRequestException.class)
+    public ResponseEntity<GlobalExceptionResponse> invalidVideoCoursesRequestHandler(
+            Exception e, HttpServletRequest request
+    ){
+        GlobalExceptionResponse response = new GlobalExceptionResponse(
+                request.getServletPath(),
+                400,
+                e.getMessage(),
+                LocalDateTime.now().toString()
+        );
+
+        return ResponseEntity.status(response.status()).body(response);
+    }
+
+    @ExceptionHandler(exception = InvalidVideoDeletionException.class)
+    public ResponseEntity<GlobalExceptionResponse> invalidVideoDeletionHandler(
+            Exception e, HttpServletRequest request
+    ){
+        GlobalExceptionResponse response = new GlobalExceptionResponse(
+                request.getServletPath(),
+                400,
+                e.getMessage(),
+                LocalDateTime.now().toString()
+        );
+
+        return ResponseEntity.status(response.status()).body(response);
+    }
+    @ExceptionHandler(exception = InvalidVideoUpdateException.class)
+    public ResponseEntity<GlobalExceptionResponse> invalidVideoUpdateException(
+            Exception e, HttpServletRequest request
+    ){
+        GlobalExceptionResponse response = new GlobalExceptionResponse(
+                request.getServletPath(),
+                400,
+                e.getMessage(),
+                LocalDateTime.now().toString()
+        );
+
+        return ResponseEntity.status(response.status()).body(response);
+    }
+
+
 
 }
 
