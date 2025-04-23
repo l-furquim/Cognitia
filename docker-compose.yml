@@ -39,7 +39,17 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
     networks:
+      - cognitia-network  
+  redis:
+    image: redis:latest
+    container_name: cognitia-redis
+    restart: always
+    hostname: redis
+    ports:
+      - "6379:6379"
+    networks:
       - cognitia-network
+  
 networks:
   cognitia-network:
     name: cognitia-network

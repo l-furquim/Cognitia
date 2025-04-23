@@ -8,6 +8,9 @@ import org.cognitia.video_ms.infra.dto.video.*;
 import org.cognitia.video_ms.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,7 +31,7 @@ public class VideoUseCase {
         this.s3Gateway = s3Gateway;
         this.fileUtils = fileUtils;
     }
-
+    @CacheEvict(key = "#uploadVideoRequest.metadata().courseId()", allEntries = true)
     public UploadVideoResponse uploadVideo(UploadVideoRequest uploadVideoRequest){
         VideoMetadataDto metadata = uploadVideoRequest.metadata();
 
@@ -112,6 +115,7 @@ public class VideoUseCase {
         return new UploadVideoThumbResponse(thumbUrl);
     }
 
+    @Cacheable(value="videos", key = "#courseId")
     public GetCourseVideosResponse getCourseVideos(Long courseId){
         if(courseId == null){
             throw new InvalidCurseVideosRequestException("Invalid curse id for searching the videos");
@@ -129,7 +133,6 @@ public class VideoUseCase {
 
         videoGateway.delete(deleteVideoRequestDto);
     }
-
     public Video updateVideo(UpdateVideoMetadataRequest request){
         if(request.videoId() == null){
             throw new InvalidVideoUpdateException("Video id is null, cannot update");
