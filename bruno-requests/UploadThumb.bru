@@ -11,5 +11,6 @@ post {
 }
 
 body:multipart-form {
-  data: {"videoId":13,"userId":"user"}
+  data: {"videoId":13,"userId":"user"} @contentType(application/json)
+  image: @file(/home/furqas/Downloads/desktop.jpg)
 }
