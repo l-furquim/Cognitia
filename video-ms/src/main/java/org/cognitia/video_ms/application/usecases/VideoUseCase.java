@@ -31,7 +31,7 @@ public class VideoUseCase {
         this.s3Gateway = s3Gateway;
         this.fileUtils = fileUtils;
     }
-    @CacheEvict(key = "#uploadVideoRequest.metadata().courseId()", allEntries = true)
+    @CacheEvict(value= "videos",key = "#uploadVideoRequest.metadata().courseId()", allEntries = true)
     public UploadVideoResponse uploadVideo(UploadVideoRequest uploadVideoRequest){
         VideoMetadataDto metadata = uploadVideoRequest.metadata();
 
@@ -84,7 +84,7 @@ public class VideoUseCase {
 
         return new UploadVideoResponse(video);
     }
-
+    @CachePut(value = "videos", key = "metadata.videoId()")
     public UploadVideoThumbResponse uploadVideoThumb(UploadVideoThumbRequest request){
         var metadata = request.metadata();
         var originalName = request.image().getOriginalFilename();
