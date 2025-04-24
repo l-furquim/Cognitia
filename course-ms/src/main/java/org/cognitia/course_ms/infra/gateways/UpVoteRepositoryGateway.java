@@ -21,10 +21,10 @@ public class UpVoteRepositoryGateway implements UpVoteGateway {
     }
 
     @Override
-    public void create(UpVote request) {
+    public Long create(UpVote request) {
         var upVoteEntity = mapper.toEntity(request);
 
-        repository.save(upVoteEntity);
+        return repository.save(upVoteEntity).getId();
     }
 
     @Transactional
@@ -45,6 +45,15 @@ public class UpVoteRepositoryGateway implements UpVoteGateway {
     @Override
     public UpVote findById(Long id) {
         var up = repository.findById(id);
+
+        if(up.isPresent()) return mapper.toDomain(up.get());
+
+        return null;
+    }
+
+    @Override
+    public UpVote findByQuestionAndAuthorId(String authorId, Long questionId) {
+        var up = repository.getByAuthorAndQuestionId(authorId, questionId);
 
         if(up.isPresent()) return mapper.toDomain(up.get());
 

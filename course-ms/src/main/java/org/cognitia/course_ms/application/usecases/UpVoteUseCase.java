@@ -3,11 +3,9 @@ package org.cognitia.course_ms.application.usecases;
 import lombok.extern.slf4j.Slf4j;
 import org.cognitia.course_ms.application.gateways.QuestionGateway;
 import org.cognitia.course_ms.application.gateways.UpVoteGateway;
+import org.cognitia.course_ms.domain.UpVote.exceptions.*;
 import org.cognitia.course_ms.domain.UpVote.dto.CreateUpVoteRequest;
 import org.cognitia.course_ms.domain.UpVote.dto.DeleteUpVoteRequest;
-import org.cognitia.course_ms.domain.UpVote.exceptions.InvalidDeleteUpvoteRequest;
-import org.cognitia.course_ms.domain.UpVote.exceptions.InvalidGetUpvotesByAuthorRequest;
-import org.cognitia.course_ms.domain.UpVote.exceptions.InvalidUpVoteRequest;
 import org.cognitia.course_ms.domain.UpVote.UpVote;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +19,11 @@ public class UpVoteUseCase {
     private final UpVoteGateway gateway;
     private final QuestionGateway questionGateway;
 
-
     public UpVoteUseCase
             (
             UpVoteGateway gateway,
-            QuestionGateway questionGateway
+            QuestionGateway questionGateway,
+            UpVoteGateway upVoteGateway
     ) {
         this.gateway = gateway;
         this.questionGateway = questionGateway;
@@ -38,14 +36,25 @@ public class UpVoteUseCase {
 
         // Chamar o open feign aqui depois para validar o usuario.
 
+        var questionExists = questionGateway.findById(request.questionId());
+
+        if(questionExists == null){
+            throw new UpvoteQuestionNotFound("Could not found the question for the upvote");
+        }
+
+        var userAlreadyUpVotedThatQuestion = gateway.findByQuestionAndAuthorId(request.authorId(), request.questionId());
+
+        if(userAlreadyUpVotedThatQuestion != null){
+            throw new UpVoteAlreadyDoneException("Cannot upvote two times at the same question");
+        }
+
         var upVote = new UpVote(
                 LocalDateTime.now(),
-                request.authorId()
+                request.authorId(),
+                request.questionId()
         );
 
         gateway.create(upVote);
-
-        questionGateway.addUpVote(upVote);
     }
 
     public void unDoUpvote(DeleteUpVoteRequest request){
@@ -53,10 +62,6 @@ public class UpVoteUseCase {
             throw new InvalidDeleteUpvoteRequest("Upvote id is null, so cannot be undone");
         }
         gateway.delete(request.upVoteId());
-
-        var upVote = gateway.findById(request.upVoteId());
-
-        questionGateway.removeUpVote(upVote);
     }
 
     public List<UpVote> getByAuthor(String authorId){

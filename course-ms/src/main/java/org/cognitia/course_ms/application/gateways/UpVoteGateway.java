@@ -7,9 +7,10 @@ import java.util.List;
 
 public interface UpVoteGateway {
 
-    void create(UpVote request);
+    Long create(UpVote request);
     void delete(Long upvoteId);
     List<UpVote> getByAuthor(String authorId);
     UpVote findById(Long id);
+    UpVote findByQuestionAndAuthorId(String authorId, Long questionId);
 
 }

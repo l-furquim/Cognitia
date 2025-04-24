@@ -19,28 +19,42 @@ public class QuestionRepositoryGateway implements QuestionGateway {
         this.repository = repository;
         this.questionMapper = questionMapper;
     }
+//
+//    @Transactional
+//    @Override
+//    public void addUpVote(Long upVoteId, Long questionId) {
+//        var question = repository.findById(questionId);
+//
+//        if(question.isPresent()) question.get().addUpVote(upVoteId); repository.save(question.get());
+//    }
+//
+//    @Transactional
+//    @Override
+//    public void removeUpVote(Long upVoteId, Long questionId) {
+//        var question = repository.findById(questionId);
+//
+//        if(question.isPresent()) question.get().removeUpVote(upVoteId); repository.save(question.get());
+//    }
 
-    @Transactional
     @Override
-    public void addUpVote(Long upVoteId, Long questionId) {
-        var question = repository.findById(questionId);
-
-        if(question.isPresent()) question.get().addUpVote(upVoteId); repository.save(question.get());
-    }
-
-    @Transactional
-    @Override
-    public void removeUpVote(Long upVoteId, Long questionId) {
-        var question = repository.findById(questionId);
-
-        if(question.isPresent()) question.get().removeUpVote(upVoteId); repository.save(question.get());
-    }
-
-    @Override
-    public void create(Question question) {
+    public Long create(Question question) {
         var questionEntity = questionMapper.toEntity(question);
 
-        repository.save(questionEntity);
+        return repository.save(questionEntity).getId();
+    }
+
+    @Transactional
+    @Override
+    public void addQuestionToBranch(Long newQuestionId, Long parentQuestionId) {
+        var newQuestion = repository.findById(newQuestionId);
+
+        var parentQuestion = repository.findById(parentQuestionId);
+
+        parentQuestion.get().addNewQuestion(newQuestion.get());
+        newQuestion.get().setParent(parentQuestion.get());
+
+        repository.save(newQuestion.get());
+        repository.save(parentQuestion.get());
     }
 
     @Override
@@ -67,5 +81,14 @@ public class QuestionRepositoryGateway implements QuestionGateway {
         return repository.getByAuthorId(authorId).stream().map(
                 q -> questionMapper.toDomain(q)
         ).toList();
+    }
+
+    @Override
+    public Question findById(Long id) {
+        var q = repository.findById(id);
+
+        if(q.isPresent()) return questionMapper.toDomain(q.get());
+
+        return null;
     }
 }

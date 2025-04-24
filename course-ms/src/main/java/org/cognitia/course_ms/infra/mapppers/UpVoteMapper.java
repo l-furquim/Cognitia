@@ -11,6 +11,7 @@ public class UpVoteMapper {
         return UpVoteEntity.builder()
                 .upVotedAt(upVote.upvotedAt())
                 .authorId(upVote.authorId())
+                .questionId(upVote.questionId())
                 .build();
     }
 

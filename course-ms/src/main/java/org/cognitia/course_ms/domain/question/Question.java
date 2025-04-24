@@ -13,7 +13,6 @@ public record Question(
         String authorId,
         String authorProfileUrl,
         String authorName,
-        List<Long> upvotes,
         List<Question> answers,
         Question parent
 ) {

@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - cognitia-postgres_data:/var/lib/postgresql/data
     networks:
       - cognitia-network
   
@@ -55,6 +55,6 @@ networks:
     name: cognitia-network
     driver: bridge
 volumes:
-  postgres_data:
+  cognitia-postgres_data:
   redis_data:
   

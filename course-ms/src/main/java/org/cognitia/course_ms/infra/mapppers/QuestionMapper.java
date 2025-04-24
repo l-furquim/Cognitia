@@ -4,6 +4,8 @@ import org.cognitia.course_ms.domain.question.Question;
 import org.cognitia.course_ms.infra.persistence.QuestionEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 @Component
 public class QuestionMapper {
 
@@ -23,6 +25,7 @@ public class QuestionMapper {
                 .authorId(question.authorId())
                 .authorName(question.authorName())
                 .videoId(question.videoId())
+                .answers(new ArrayList<>())
                 .build();
     }
 
@@ -36,7 +39,6 @@ public class QuestionMapper {
                 question.getAuthorId(),
                 question.getAuthorProfileUrl(),
                 question.getAuthorName(),
-                question.getUpvotes(),
                 question.getAnswers().stream().map( an -> this.toDomain(an) ).toList(),
                 this.toDomain(question.getParent())
         );
