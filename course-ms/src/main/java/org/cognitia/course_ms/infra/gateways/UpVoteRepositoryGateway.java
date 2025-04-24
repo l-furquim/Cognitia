@@ -2,7 +2,7 @@ package org.cognitia.course_ms.infra.gateways;
 
 import jakarta.transaction.Transactional;
 import org.cognitia.course_ms.application.gateways.UpVoteGateway;
-import org.cognitia.course_ms.domain.model.UpVote;
+import org.cognitia.course_ms.domain.UpVote.UpVote;
 import org.cognitia.course_ms.infra.mapppers.UpVoteMapper;
 import org.cognitia.course_ms.infra.persistence.repository.UpVoteJpaRepository;
 import org.springframework.stereotype.Component;

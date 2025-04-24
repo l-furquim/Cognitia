@@ -1,7 +1,7 @@
 package org.cognitia.course_ms.application.gateways;
 
 
-import org.cognitia.course_ms.domain.model.UpVote;
+import org.cognitia.course_ms.domain.UpVote.UpVote;
 
 import java.util.List;
 

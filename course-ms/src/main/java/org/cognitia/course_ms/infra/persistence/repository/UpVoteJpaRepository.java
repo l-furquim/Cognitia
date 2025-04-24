@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface UpVoteJpaRepository extends JpaRepository<UpVoteEntity, Long> {
 
-    @Query("SELECT u FROM UpVoteEntity u WHERE u.authodId = :authorId")
+    @Query("SELECT u FROM UpVoteEntity u WHERE u.authorId = :authorId")
     List<UpVoteEntity> getByAuthorId(@Param("authorId") String authorId);
 
 }

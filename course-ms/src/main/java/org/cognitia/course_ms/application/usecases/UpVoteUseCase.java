@@ -8,7 +8,7 @@ import org.cognitia.course_ms.domain.UpVote.dto.DeleteUpVoteRequest;
 import org.cognitia.course_ms.domain.UpVote.exceptions.InvalidDeleteUpvoteRequest;
 import org.cognitia.course_ms.domain.UpVote.exceptions.InvalidGetUpvotesByAuthorRequest;
 import org.cognitia.course_ms.domain.UpVote.exceptions.InvalidUpVoteRequest;
-import org.cognitia.course_ms.domain.model.UpVote;
+import org.cognitia.course_ms.domain.UpVote.UpVote;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

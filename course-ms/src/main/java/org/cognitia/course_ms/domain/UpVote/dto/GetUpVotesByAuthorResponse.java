@@ -1,6 +1,6 @@
 package org.cognitia.course_ms.domain.UpVote.dto;
 
-import org.cognitia.course_ms.domain.model.UpVote;
+import org.cognitia.course_ms.domain.UpVote.UpVote;
 
 import java.util.List;
 

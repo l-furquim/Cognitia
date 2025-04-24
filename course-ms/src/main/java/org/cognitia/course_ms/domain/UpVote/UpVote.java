@@ -1,9 +1,10 @@
-package org.cognitia.course_ms.domain.model;
+package org.cognitia.course_ms.domain.UpVote;
 
 import java.time.LocalDateTime;
 
 public record UpVote(
         LocalDateTime upvotedAt,
-        String authorId
+        String authorId,
+        Long questionId
 ) {
 }

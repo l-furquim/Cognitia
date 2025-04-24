@@ -1,6 +1,6 @@
 package org.cognitia.course_ms.infra.mapppers;
 
-import org.cognitia.course_ms.domain.model.UpVote;
+import org.cognitia.course_ms.domain.UpVote.UpVote;
 import org.cognitia.course_ms.infra.persistence.UpVoteEntity;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,8 @@ public class UpVoteMapper {
     public UpVote toDomain(UpVoteEntity upVote){
         return new UpVote(
                 upVote.getUpVotedAt(),
-                upVote.getAuthorId()
+                upVote.getAuthorId(),
+                upVote.getQuestionId()
         );
     }
 
