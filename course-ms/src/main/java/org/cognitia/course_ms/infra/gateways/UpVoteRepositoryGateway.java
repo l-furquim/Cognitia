@@ -55,6 +55,8 @@ public class UpVoteRepositoryGateway implements UpVoteGateway {
     public UpVote findByQuestionAndAuthorId(String authorId, Long questionId) {
         var up = repository.getByAuthorAndQuestionId(authorId, questionId);
 
+        System.out.println(up.toString());
+
         if(up.isPresent()) return mapper.toDomain(up.get());
 
         return null;

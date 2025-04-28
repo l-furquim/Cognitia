@@ -3,6 +3,8 @@ package org.cognitia.course_ms.infra.controllers.impl;
 import org.cognitia.course_ms.application.usecases.QuestionUseCase;
 import org.cognitia.course_ms.domain.UpVote.dto.DeleteUpVoteRequest;
 import org.cognitia.course_ms.domain.question.dto.CreateQuestionRequest;
+import org.cognitia.course_ms.domain.question.dto.GetCourseQuestionsRequest;
+import org.cognitia.course_ms.domain.question.dto.GetCourseQuestionsResponse;
 import org.cognitia.course_ms.domain.question.dto.GetVideoQuestionsResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +40,12 @@ public class QuestionControllerImpl {
         return ResponseEntity.ok().body(new GetVideoQuestionsResponse(videos));
     }
 
+    @GetMapping("/course")
+    public ResponseEntity<GetCourseQuestionsResponse> getByCourse(@RequestBody GetCourseQuestionsRequest request){
+        var questions = useCase.getByCourse(request);
+
+        return ResponseEntity.ok().body(questions);
+    }
 
 
 }

@@ -1,5 +1,7 @@
 package org.cognitia.course_ms.infra.persistence;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,6 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -35,9 +38,14 @@ public class QuestionEntity {
 
     private String authorName;
 
+    @JsonManagedReference
+    @ToString.Exclude
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuestionEntity> answers; // sub-perguntas
 
+
+    @JsonBackReference
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private QuestionEntity parent; // pergunta que originou essa

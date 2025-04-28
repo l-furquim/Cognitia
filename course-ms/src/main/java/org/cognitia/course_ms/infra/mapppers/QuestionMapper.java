@@ -17,31 +17,51 @@ public class QuestionMapper {
 
     public QuestionEntity toEntity(Question question){
         return QuestionEntity.builder()
-                .content(question.content())
-                .courseId(question.courseId())
-                .questionedAt(question.questionedAt())
-                .path(question.path())
-                .authorProfileUrl(question.authorProfileUrl())
-                .authorId(question.authorId())
-                .authorName(question.authorName())
-                .videoId(question.videoId())
+                .content(question.getContent())
+                .courseId(question.getCourseId())
+                .questionedAt(question.getQuestionedAt())
+                .path(question.getPath())
+                .authorProfileUrl(question.getAuthorProfileUrl())
+                .authorId(question.getAuthorId())
+                .authorName(question.getAuthorName())
+                .videoId(question.getVideoId())
                 .answers(new ArrayList<>())
                 .build();
     }
 
-    public Question toDomain(QuestionEntity question){
-        return new Question(
-                question.getContent(),
-                question.getCourseId(),
-                question.getVideoId(),
-                question.getPath(),
-                question.getQuestionedAt(),
-                question.getAuthorId(),
-                question.getAuthorProfileUrl(),
-                question.getAuthorName(),
-                question.getAnswers().stream().map( an -> this.toDomain(an) ).toList(),
-                this.toDomain(question.getParent())
-        );
+    public Question toDomain(QuestionEntity question, boolean mapParent) {
+        return Question.builder()
+                .content(question.getContent())
+                .courseId(question.getCourseId())
+                .videoId(question.getVideoId())
+                .path(question.getPath())
+                .questionedAt(question.getQuestionedAt())
+                .authorId(question.getAuthorId())
+                .authorProfileUrl(question.getAuthorProfileUrl())
+                .authorName(question.getAuthorName())
+                .answers(
+                        question.getAnswers().stream()
+                                .map(an -> this.toDomain(an, false)) // Não realiza a busca para que não ocorra o stack overflow
+                                .toList()
+                )
+                .parent(
+                        mapParent && question.getParent() != null ? this.toDomain(question.getParent(), false) : null
+                )
+                .build();
     }
 
+    public Question toSimpleDomain(QuestionEntity question){
+        return Question.builder()
+                .content(question.getContent())
+                .courseId(question.getCourseId())
+                .videoId(question.getVideoId())
+                .path(question.getPath())
+                .questionedAt(question.getQuestionedAt())
+                .authorId(question.getAuthorId())
+                .authorProfileUrl(question.getAuthorProfileUrl())
+                .authorName(question.getAuthorName())
+                .answers(new ArrayList<>())
+                .parent(null)
+                .build();
+    }
 }

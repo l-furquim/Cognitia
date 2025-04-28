@@ -1,0 +1,26 @@
+meta {
+  name: Get by course
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://localhost:8081/v1/api/questions/course
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "courseId": 1,
+    "videoId": 9,
+    "shortOption": {
+      "recent": false,
+      "mostUpVoted": true,
+      "recommended": false
+    },
+    "pageStart": 7,
+    "pageEnd": 0
+  }
+  
+}

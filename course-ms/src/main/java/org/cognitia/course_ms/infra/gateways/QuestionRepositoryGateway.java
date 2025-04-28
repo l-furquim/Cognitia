@@ -1,14 +1,20 @@
 package org.cognitia.course_ms.infra.gateways;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.cognitia.course_ms.application.gateways.QuestionGateway;
 import org.cognitia.course_ms.domain.question.Question;
+import org.cognitia.course_ms.domain.question.dto.GetCourseQuestionsResponse;
 import org.cognitia.course_ms.infra.mapppers.QuestionMapper;
 import org.cognitia.course_ms.infra.persistence.repository.QuestionJpaRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
+
+@Slf4j
 @Component
 public class QuestionRepositoryGateway implements QuestionGateway {
 
@@ -19,22 +25,6 @@ public class QuestionRepositoryGateway implements QuestionGateway {
         this.repository = repository;
         this.questionMapper = questionMapper;
     }
-//
-//    @Transactional
-//    @Override
-//    public void addUpVote(Long upVoteId, Long questionId) {
-//        var question = repository.findById(questionId);
-//
-//        if(question.isPresent()) question.get().addUpVote(upVoteId); repository.save(question.get());
-//    }
-//
-//    @Transactional
-//    @Override
-//    public void removeUpVote(Long upVoteId, Long questionId) {
-//        var question = repository.findById(questionId);
-//
-//        if(question.isPresent()) question.get().removeUpVote(upVoteId); repository.save(question.get());
-//    }
 
     @Override
     public Long create(Question question) {
@@ -67,19 +57,14 @@ public class QuestionRepositoryGateway implements QuestionGateway {
     @Override
     public List<Question> getByVideoId(Long videoId) {
         return repository.getByVideoId(videoId).stream().map(
-                q -> questionMapper.toDomain(q)
+                q -> questionMapper.toDomain(q, false)
         ).toList();
-    }
-
-    @Override
-    public Integer getCourseTotalQuestions(Long courseId) {
-        return repository.getCourseTotalQuestions(courseId);
     }
 
     @Override
     public List<Question> getByAuthorId(String authorId) {
         return repository.getByAuthorId(authorId).stream().map(
-                q -> questionMapper.toDomain(q)
+                q -> questionMapper.toDomain(q, true)
         ).toList();
     }
 
@@ -87,8 +72,90 @@ public class QuestionRepositoryGateway implements QuestionGateway {
     public Question findById(Long id) {
         var q = repository.findById(id);
 
-        if(q.isPresent()) return questionMapper.toDomain(q.get());
+        log.info("Question: {}", q.toString());
+
+        if(q.isPresent()) return questionMapper.toSimpleDomain(q.get());
 
         return null;
+    }
+
+    @Override
+    public GetCourseQuestionsResponse getByVideoMostRecents(Long videoId, int start, int end) {
+        var questions = repository.findRecentQuestionsByVideoId(videoId,PageRequest.of(start, end));
+
+        List<Question> qs = new ArrayList<>();
+
+        questions.forEach(
+                q -> {
+
+                    Question questionDomain = questionMapper.toSimpleDomain(q);
+                    questionDomain.setUpvotes(repository.getQuestionTotalVotesById(q.getId()));
+
+                    qs.add(questionDomain);
+
+                }
+        );
+
+        return new GetCourseQuestionsResponse(qs);
+    }
+
+    @Override
+    public GetCourseQuestionsResponse getByCourseMostRecents(Long courseId,int start, int end) {
+        var questions = repository.findRecentQuestionsByCourseId(courseId,PageRequest.of(start, end));
+
+        List<Question> qs = new ArrayList<>();
+
+        questions.forEach(
+                q -> {
+
+                    Question questionDomain = questionMapper.toSimpleDomain(q);
+                    questionDomain.setUpvotes(repository.getQuestionTotalVotesById(q.getId()));
+
+                    qs.add(questionDomain);
+
+                }
+        );
+
+        return new GetCourseQuestionsResponse(qs);
+    }
+
+    @Override
+    public GetCourseQuestionsResponse getByVideoMostUpVoted(Long videoId,int start, int end) {
+        var questions = repository.findTopQuestionsByUpVotesAndVideoId(videoId, start, end);
+
+        List<Question> qs = new ArrayList<>();
+
+        questions.forEach(
+                q -> {
+
+                    Question questionDomain = questionMapper.toSimpleDomain(q);
+                    questionDomain.setUpvotes(repository.getQuestionTotalVotesById(q.getId()));
+
+                    qs.add(questionDomain);
+
+                }
+        );
+
+        return new GetCourseQuestionsResponse(qs);
+    }
+
+    @Override
+    public GetCourseQuestionsResponse getByCourseMostUpVoted(Long courseId, int start, int end) {
+        var questions = repository.findTopQuestionsByUpVotesAndCourseId(courseId, start, end);
+
+            List<Question> qs = new ArrayList<>();
+
+        questions.forEach(
+                q -> {
+
+                    Question questionDomain = questionMapper.toDomain(q, false);
+                    questionDomain.setUpvotes(repository.getQuestionTotalVotesById(q.getId()));
+
+                    qs.add(questionDomain);
+
+                }
+        );
+
+        return new GetCourseQuestionsResponse(qs);
     }
 }

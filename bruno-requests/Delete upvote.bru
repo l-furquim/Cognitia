@@ -1,0 +1,17 @@
+meta {
+  name: Delete upvote
+  type: http
+  seq: 8
+}
+
+delete {
+  url: http://localhost:8081/v1/api/upvotes
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "upVoteId": 2
+  }
+}
