@@ -123,6 +123,8 @@ public class QuestionRepositoryGateway implements QuestionGateway {
     public GetCourseQuestionsResponse getByVideoMostUpVoted(Long videoId,int start, int end) {
         var questions = repository.findTopQuestionsByUpVotesAndVideoId(videoId, start, end);
 
+        log.info("Questions: {}", questions.toString());
+
         List<Question> qs = new ArrayList<>();
 
         questions.forEach(
@@ -132,7 +134,6 @@ public class QuestionRepositoryGateway implements QuestionGateway {
                     questionDomain.setUpvotes(repository.getQuestionTotalVotesById(q.getId()));
 
                     qs.add(questionDomain);
-
                 }
         );
 
@@ -143,12 +144,12 @@ public class QuestionRepositoryGateway implements QuestionGateway {
     public GetCourseQuestionsResponse getByCourseMostUpVoted(Long courseId, int start, int end) {
         var questions = repository.findTopQuestionsByUpVotesAndCourseId(courseId, start, end);
 
-            List<Question> qs = new ArrayList<>();
+        List<Question> qs = new ArrayList<>();
 
         questions.forEach(
                 q -> {
 
-                    Question questionDomain = questionMapper.toDomain(q, false);
+                    Question questionDomain = questionMapper.toSimpleDomain(q);
                     questionDomain.setUpvotes(repository.getQuestionTotalVotesById(q.getId()));
 
                     qs.add(questionDomain);

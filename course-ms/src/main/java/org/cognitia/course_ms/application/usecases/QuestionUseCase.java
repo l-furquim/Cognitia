@@ -97,17 +97,17 @@ public class QuestionUseCase {
         if(request.shortOption().recent()){
             if(request.videoId() != null){
                 questionsToBeReturned = gateway.getByVideoMostRecents(request.videoId(), request.pageStart(), request.pageEnd());
+            }else{
+                questionsToBeReturned = gateway.getByCourseMostRecents(request.courseId(), request.pageStart(), request.pageEnd());
             }
-
-            questionsToBeReturned = gateway.getByCourseMostRecents(request.courseId(), request.pageStart(), request.pageEnd());
         }
 
         if(request.shortOption().mostUpVoted()){
             if(request.videoId() != null){
                 questionsToBeReturned = gateway.getByVideoMostUpVoted(request.videoId(), request.pageEnd(), request.pageStart());
+            }else{
+                questionsToBeReturned = gateway.getByCourseMostUpVoted(request.courseId(), request.pageEnd(), request.pageStart());
             }
-
-            questionsToBeReturned = gateway.getByCourseMostUpVoted(request.courseId(), request.pageEnd(), request.pageStart());
         }
         return new GetCourseQuestionsResponse(questionsToBeReturned.questions());
     }
