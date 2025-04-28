@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record UpVote(
         LocalDateTime upvotedAt,
         String authorId,
-        Long questionId
+        Long questionId,
+        Long reviewId
 ) {
 }

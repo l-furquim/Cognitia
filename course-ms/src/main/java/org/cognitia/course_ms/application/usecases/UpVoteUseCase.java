@@ -2,6 +2,7 @@ package org.cognitia.course_ms.application.usecases;
 
 import lombok.extern.slf4j.Slf4j;
 import org.cognitia.course_ms.application.gateways.QuestionGateway;
+import org.cognitia.course_ms.application.gateways.ReviewGateway;
 import org.cognitia.course_ms.application.gateways.UpVoteGateway;
 import org.cognitia.course_ms.domain.UpVote.exceptions.*;
 import org.cognitia.course_ms.domain.UpVote.dto.CreateUpVoteRequest;
@@ -18,40 +19,34 @@ public class UpVoteUseCase {
 
     private final UpVoteGateway gateway;
     private final QuestionGateway questionGateway;
+    private final ReviewGateway reviewGateway;
 
     public UpVoteUseCase
             (
             UpVoteGateway gateway,
             QuestionGateway questionGateway,
-            UpVoteGateway upVoteGateway
+            UpVoteGateway upVoteGateway,
+            ReviewGateway reviewGateway
     ) {
         this.gateway = gateway;
         this.questionGateway = questionGateway;
+        this.reviewGateway = reviewGateway;
     }
 
     public void create(CreateUpVoteRequest  request){
-        if(request.authorId() == null || request.authorId().isEmpty()){
-            throw new InvalidUpVoteRequest("Author id cannot be null or empty");
+        if(request.authorId() == null || request.authorId().isEmpty()
+        || (request.reviewId() == null && request.questionId() == null)
+        ){
+            throw new InvalidUpVoteRequest("Invalid data for a upvote");
         }
 
-        // Chamar o open feign aqui depois para validar o usuario.
-
-        var questionExists = questionGateway.findById(request.questionId());
-
-        if(questionExists == null){
-            throw new UpvoteQuestionNotFound("Could not found the question for the upvote");
-        }
-
-        var userAlreadyUpVotedThatQuestion = gateway.findByQuestionAndAuthorId(request.authorId(), request.questionId());
-
-        if(userAlreadyUpVotedThatQuestion != null){
-            throw new UpVoteAlreadyDoneException("Cannot upvote two times at the same question");
-        }
+        validateUpVote(request);
 
         var upVote = new UpVote(
                 LocalDateTime.now(),
                 request.authorId(),
-                request.questionId()
+                request.questionId(),
+                request.reviewId()
         );
 
         gateway.create(upVote);
@@ -72,5 +67,24 @@ public class UpVoteUseCase {
         return gateway.getByAuthor(authorId);
     }
 
+    private void validateUpVote(CreateUpVoteRequest  request){
+        // Chamar o open feign aqui depois para validar o usuario.
+
+        if(request.questionId() != null){
+            var questionExists = questionGateway.findById(request.questionId());
+
+            if(questionExists == null){
+                throw new UpvoteQuestionNotFound("Could not found the question for the upvote");
+            }
+
+            var userAlreadyUpVotedThatQuestion = gateway.findByQuestionAndAuthorId(request.authorId(), request.questionId());
+
+            if(userAlreadyUpVotedThatQuestion != null){
+                throw new UpVoteAlreadyDoneException("Cannot upvote two times at the same question");
+            }
+
+            return;
+        }
+    }
 
 }

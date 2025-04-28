@@ -2,6 +2,7 @@ package org.cognitia.course_ms.domain.UpVote.dto;
 
 public record CreateUpVoteRequest(
         String authorId,
-        Long questionId
+        Long questionId,
+        Long reviewId
 ) {
 }

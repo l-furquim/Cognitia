@@ -25,4 +25,6 @@ public class UpVoteEntity {
 
     private Long questionId;
 
+    private Long reviewId;
+
 }

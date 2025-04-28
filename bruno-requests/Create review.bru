@@ -1,0 +1,22 @@
+meta {
+  name: Create review
+  type: http
+  seq: 12
+}
+
+post {
+  url: http://localhost:8081/v1/api/reviews
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "rate": 2.5,
+    "description": "Cara curso daora mas 150 pau não rola mano",
+    "authorId": "aaaaaaaaa",
+    "courseId": 1,
+    "authorName": "Lucas",
+    "authorProfileUrl": "foto"
+  }
+}

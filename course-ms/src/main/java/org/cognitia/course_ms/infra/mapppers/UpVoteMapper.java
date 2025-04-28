@@ -12,6 +12,7 @@ public class UpVoteMapper {
                 .upVotedAt(upVote.upvotedAt())
                 .authorId(upVote.authorId())
                 .questionId(upVote.questionId())
+                .reviewId(upVote.reviewId())
                 .build();
     }
 
@@ -19,7 +20,8 @@ public class UpVoteMapper {
         return new UpVote(
                 upVote.getUpVotedAt(),
                 upVote.getAuthorId(),
-                upVote.getQuestionId()
+                upVote.getQuestionId(),
+                upVote.getReviewId()
         );
     }
 
