@@ -4,7 +4,7 @@ import java.util.List;
 
 public record GetPathDataByCourseResponse(
         String title,
-        List<VideoDto> paths,
+        List<VideoDto> videos,
         Long totalVideos,
         Double totalDuration
 ) {
