@@ -5,5 +5,6 @@ import org.cognitia.course_ms.domain.path.dto.GetCourseVideosResponse;
 public interface VideoGateway {
 
     GetCourseVideosResponse getPathVideos(Long pathId);
+    void deleteVideoById(Long videoId);
 
 }

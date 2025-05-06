@@ -11,7 +11,8 @@ public interface PathGateway {
     void createPath(Path pathRequest);
     void addVideoToPath(AddVideoToPathRequest request);
     void deleteVideoFromPath(DeleteVideoFromPathRequest request);
-    List<String> getPathDataByCourse(GetPathDataByCourseRequest request);
+//    List<String> getPathDataByCourse(GetPathDataByCourseRequest request);
+    Path findById(Long id);
 
 
 }

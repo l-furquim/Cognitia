@@ -48,12 +48,23 @@ public class PathRepositoryGateway implements PathGateway {
         pathJpaRepository.save(pathEntity.get());
     }
 
-    @Override
-    public List<String> getPathDataByCourse(GetPathDataByCourseRequest request) {
-        var pathsEntity = pathJpaRepository.findByCourseId(request.courseId());
+//    @Override
+//    public List<String> getPathDataByCourse(GetPathDataByCourseRequest request) {
+//        var pathsEntity = pathJpaRepository.findByCourseId(request.courseId());
+//
+//        return pathsEntity.stream().map(
+//                p -> p.getTitle()
+//        ).toList();
+//    }
 
-        return pathsEntity.stream().map(
-                p -> p.getTitle()
-        ).toList();
+    @Override
+    public Path findById(Long id) {
+        var path = pathJpaRepository.findById(id);
+
+        if(path.isPresent()){
+            return pathMapper.toDomain(path.get());
+        }
+
+        return null;
     }
 }

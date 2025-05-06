@@ -1,7 +1,7 @@
 meta {
   name: Upload video
   type: http
-  seq: 2
+  seq: 1
 }
 
 post {
@@ -12,5 +12,5 @@ post {
 
 body:multipart-form {
   data: {"title":"Introdução ao Java","description":"Este vídeo apresenta os conceitos básicos da linguagem Java.","path":1,"skill":"Programação","courseId":98765} @contentType(application/json)
-  video: @file(/home/furqas/Downloads/videoTeste.mp4)
+  video: @file(/home/furqas/Downloads/videoplayback.mp4)
 }

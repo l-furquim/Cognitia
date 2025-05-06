@@ -25,3 +25,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+feign:
+  client:
+    video:
+      url: http://localhost:8080/v1/api/videos

@@ -3,7 +3,7 @@ package org.cognitia.course_ms.infra.gateways;
 import lombok.extern.slf4j.Slf4j;
 import org.cognitia.course_ms.application.gateways.VideoGateway;
 import org.cognitia.course_ms.domain.path.dto.GetCourseVideosResponse;
-import org.cognitia.course_ms.domain.path.exceptions.ErrorWhileGettingPathVideos;
+import org.cognitia.course_ms.domain.path.exceptions.VideoClientException;
 import org.cognitia.course_ms.infra.client.VideoClient;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,19 @@ public class VideoClientGateway implements VideoGateway {
             return videos.getBody();
         }catch (Exception e){
             log.error("Erro ao buscar os videos no client {}", e.getMessage());
-            throw new ErrorWhileGettingPathVideos(e.getMessage());
+            throw new VideoClientException(e.getMessage());
         }
     }
+
+    @Override
+    public void deleteVideoById(Long videoId) {
+        try{
+            videoClient.deleteByVideo(videoId);
+        }catch (Exception e){
+            log.error("Erro remover o video do client {}", e.getMessage());
+            throw new VideoClientException(e.getMessage());
+        }
+    }
+
+
 }

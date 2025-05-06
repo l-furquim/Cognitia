@@ -1,6 +1,7 @@
 package org.cognitia.course_ms.domain.model;
 
 import org.cognitia.course_ms.domain.enums.Topic;
+import org.cognitia.course_ms.domain.path.Path;
 import org.cognitia.course_ms.domain.review.Review;
 
 import java.time.LocalDateTime;
