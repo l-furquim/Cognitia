@@ -13,6 +13,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class VideoUseCase {
 
@@ -141,6 +143,12 @@ public class VideoUseCase {
         return videoGateway.update(request);
     }
 
+    public List<Video> getPathVideos(Long pathId){
+        if(pathId == null){
+            throw new InvalidGetPathVideosRequest("Path id is null, cannot get videos");
+        }
 
+        return videoGateway.getByPath(pathId);
+    }
 
 }

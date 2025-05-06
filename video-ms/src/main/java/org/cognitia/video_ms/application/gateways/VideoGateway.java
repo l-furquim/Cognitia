@@ -16,6 +16,6 @@ public interface VideoGateway {
     String get(GetVideoRequestDto getVideoRequestDto);
     List<Video> getByCourseId(Long courseId);
     Video update(UpdateVideoMetadataRequest request);
-
+    List<Video> getByPath(Long path);
 
 }

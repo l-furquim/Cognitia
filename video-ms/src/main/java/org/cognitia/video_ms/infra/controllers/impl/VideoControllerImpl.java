@@ -48,6 +48,13 @@ public class VideoControllerImpl implements VideoController {
         return ResponseEntity.ok().body(videos);
     }
 
+    @GetMapping("/path/{pathId}")
+    public ResponseEntity<GetPathVideosResponse> getPathVideos(@PathVariable("pathId")Long pathId){
+        var videos = videoUseCase.getPathVideos(pathId);
+
+        return ResponseEntity.ok().body(new GetPathVideosResponse(videos));
+    }
+
     @DeleteMapping("/video/{videoId}")
     public ResponseEntity<Void> deleteVideo(@PathVariable("videoId") Long videoId){
         videoUseCase.deleteVideo(new DeleteVideoRequestDto(videoId));
@@ -61,6 +68,5 @@ public class VideoControllerImpl implements VideoController {
 
         return ResponseEntity.ok().body(video);
     }
-
 
 }

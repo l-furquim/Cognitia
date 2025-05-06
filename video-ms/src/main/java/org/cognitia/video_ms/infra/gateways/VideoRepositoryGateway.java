@@ -99,4 +99,15 @@ public class VideoRepositoryGateway implements VideoGateway {
         }
         return videoMapper.toDomain(videoEntity.get());
     }
+
+    @Override
+    public List<Video> getByPath(Long path) {
+        var videosEntity = videoJpaRepository.findById(path);
+
+        return videosEntity.map(
+                v -> videoMapper.toDomain(
+                        v
+                )
+        ).stream().toList();
+    }
 }
