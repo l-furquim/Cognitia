@@ -2,7 +2,6 @@ package org.cognitia.course_ms.infra.controllers.impl;
 
 import org.cognitia.course_ms.application.usecases.PathUseCase;
 import org.cognitia.course_ms.domain.path.dto.CreatePathRequest;
-import org.cognitia.course_ms.domain.path.dto.DeleteVideoFromPathRequest;
 import org.cognitia.course_ms.domain.path.dto.GetPathDataByCourseRequest;
 import org.cognitia.course_ms.domain.path.dto.GetPathDataByCourseResponse;
 import org.cognitia.course_ms.infra.controllers.PathController;
@@ -33,10 +32,10 @@ public class PathControllerImpl implements PathController {
         return ResponseEntity.ok().body(data);
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> delete(@RequestBody DeleteVideoFromPathRequest request){
-        pathUseCase.deleteVideoFromPath(request);
+    @DeleteMapping("/path/{pathId}")
+    public ResponseEntity<Void> delete(@PathVariable("pathId") Long pathId) {
+        pathUseCase.deletePath(pathId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(204).build();
     }
 }

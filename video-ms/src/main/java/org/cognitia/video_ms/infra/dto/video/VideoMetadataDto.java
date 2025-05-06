@@ -5,6 +5,7 @@ public record VideoMetadataDto(
         String description,
         Long path,
         String skill,
-        Long courseId
+        Long courseId,
+        String authorId
 ) {
 }

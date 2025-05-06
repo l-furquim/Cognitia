@@ -22,13 +22,14 @@ public class VideoUseCase {
     private final VideoGateway videoGateway;
     private final S3Gateway s3Gateway;
     private final FileUtils fileUtils;
+    private static final String TOPIC = "path.add";
 
     public VideoUseCase
             (
             VideoGateway videoGateway,
             S3Gateway s3Gateway,
             FileUtils fileUtils
-    ){
+            ){
         this.videoGateway = videoGateway;
         this.s3Gateway = s3Gateway;
         this.fileUtils = fileUtils;
@@ -49,6 +50,8 @@ public class VideoUseCase {
 //        if(!uploadVideoRequest.video().getContentType().equals(".mp4")){
 //            throw new InvalidVideoContentTypeException("Invalid video extension, we only support mp4");
 //        }
+
+        // validar se o autor existe
 
         var videoPath = fileUtils.convertToFile(uploadVideoRequest.video());
 
@@ -79,10 +82,6 @@ public class VideoUseCase {
                 null,
                 metadata.courseId()
         );
-
-        new Thread(() -> {
-            videoGateway.upload(video);
-        }).start();
 
         return new UploadVideoResponse(video);
     }

@@ -1,6 +1,7 @@
 package org.cognitia.course_ms.infra.gateways;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.cognitia.course_ms.application.gateways.PathGateway;
 import org.cognitia.course_ms.domain.path.Path;
 import org.cognitia.course_ms.domain.path.dto.*;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class PathRepositoryGateway implements PathGateway {
 
@@ -28,25 +30,6 @@ public class PathRepositoryGateway implements PathGateway {
         pathJpaRepository.save(pathEntity);
     }
 
-    @Transactional
-    @Override
-    public void addVideoToPath(AddVideoToPathRequest request) {
-        var pathEntity = pathJpaRepository.findById(request.pathId());
-
-        pathEntity.get().addVideoId(request.videoId());
-
-        pathJpaRepository.save(pathEntity.get());
-    }
-
-    @Transactional
-    @Override
-    public void deleteVideoFromPath(DeleteVideoFromPathRequest request) {
-        var pathEntity = pathJpaRepository.findById(request.pathId());
-
-        pathEntity.get().removeVideoId(request.videoId());
-
-        pathJpaRepository.save(pathEntity.get());
-    }
 
 //    @Override
 //    public List<String> getPathDataByCourse(GetPathDataByCourseRequest request) {
@@ -66,5 +49,16 @@ public class PathRepositoryGateway implements PathGateway {
         }
 
         return null;
+    }
+
+    @Override
+    public void delete(Long id) {
+        var path = pathJpaRepository.findById(id);
+
+        if(path.isEmpty()){
+            log.warn("Path with id {} not found", id);
+            return;
+        }
+        pathJpaRepository.delete(path.get());
     }
 }

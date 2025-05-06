@@ -11,7 +11,6 @@ public class PathMapper {
         return Path.builder()
                 .title(pathEntity.getTitle())
                 .courseId(pathEntity.getCourseId())
-                .videosId(pathEntity.getVideosId())
                 .build();
     }
 
@@ -19,7 +18,6 @@ public class PathMapper {
         return PathEntity.builder()
                 .title(path.getTitle())
                 .courseId(path.getCourseId())
-                .videosId(path.getVideosId())
                 .build();
     }
 

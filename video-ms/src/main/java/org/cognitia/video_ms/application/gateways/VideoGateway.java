@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface VideoGateway {
 
-    void upload(Video video);
+    Long upload(Video video);
     Video findById(Long id);
     void uploadThumb(Long videoId, String thumbUrl);
     void delete(DeleteVideoRequestDto deleteVideoRequestDto);
@@ -17,5 +17,6 @@ public interface VideoGateway {
     List<Video> getByCourseId(Long courseId);
     Video update(UpdateVideoMetadataRequest request);
     List<Video> getByPath(Long path);
+    void deleteVideoByPath(Long path);
 
 }

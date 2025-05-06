@@ -1,28 +1,31 @@
 package org.cognitia.course_ms.application.usecases;
 
+import lombok.extern.slf4j.Slf4j;
 import org.cognitia.course_ms.application.gateways.PathGateway;
 import org.cognitia.course_ms.application.gateways.VideoGateway;
 import org.cognitia.course_ms.domain.path.Path;
 import org.cognitia.course_ms.domain.path.dto.*;
-import org.cognitia.course_ms.domain.path.exceptions.InvalidAddVideoToPathRequest;
 import org.cognitia.course_ms.domain.path.exceptions.InvalidCreatePathRequest;
 import org.cognitia.course_ms.domain.path.exceptions.InvalidDeleteVideoFromPathRequest;
 import org.cognitia.course_ms.domain.path.exceptions.PathNotFoundException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 @Service
 public class PathUseCase {
 
+    private static final String TOPIC = "video.path.delete";
     private final PathGateway pathGateway;
     private final VideoGateway videoGateway;
+    private final KafkaTemplate<String, DeleteVideoPathsRequest> deleteVideoTemplate;
 
-    public PathUseCase(PathGateway pathGateway, VideoGateway videoGateway) {
+    public PathUseCase(PathGateway pathGateway, VideoGateway videoGateway, KafkaTemplate<String, DeleteVideoPathsRequest> deleteVideoTemplate) {
         this.pathGateway = pathGateway;
         this.videoGateway = videoGateway;
+        this.deleteVideoTemplate = deleteVideoTemplate;
     }
 
     public void createPath(CreatePathRequest createPathRequest) {
@@ -38,41 +41,9 @@ public class PathUseCase {
         var path = Path.builder()
                 .title(createPathRequest.title())
                 .courseId(createPathRequest.courseId())
-                .videosId(new ArrayList<>())
                 .build();
 
         pathGateway.createPath(path);
-    }
-
-    public void addVideoToPath(MultipartFile file, AddVideoToPathRequest request){
-        if(request.pathId() == null || request.videoId() == null ||
-        request.userId() == null || request.userId().isEmpty()) {
-            throw new InvalidAddVideoToPathRequest("Please provide a valid data.");
-        }
-
-        var path = pathGateway.findById(request.pathId());
-
-        if(path == null){
-            throw new PathNotFoundException("Could not find path with id: " + request.pathId());
-        }
-        pathGateway.addVideoToPath(request);
-    }
-
-
-    public void deleteVideoFromPath(DeleteVideoFromPathRequest request){
-        if(request.pathId() == null || request.videoId() == null ||
-        request.userId() == null || request.userId().isEmpty()) {
-            throw new InvalidDeleteVideoFromPathRequest("Please provide a valid data.");
-        }
-
-        // validar aqui depois se o usuario que esta criando o path é o dono do curso
-
-        new Thread(() -> {
-            videoGateway.deleteVideoById(request.videoId());
-        }).start();
-
-
-        pathGateway.deleteVideoFromPath(request);
     }
 
     public GetPathDataByCourseResponse getPathData(GetPathDataByCourseRequest request){
@@ -102,6 +73,20 @@ public class PathUseCase {
                 totalVideos.get(),
                 totalDuration.get()
         );
+    }
+
+    public void deletePath(Long pathId){
+
+        // validar aqui se o usuario pode excluir o path;
+
+        log.info("Removendo o path... {}", pathId);
+
+        pathGateway.delete(pathId);
+        deleteVideoTemplate.send(
+                TOPIC,
+                new DeleteVideoPathsRequest(pathId)
+        );
+        log.info("Path removido com sucesso");
     }
 
 }

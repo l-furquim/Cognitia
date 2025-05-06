@@ -1,6 +1,7 @@
 package org.cognitia.video_ms.infra.gateways;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.cognitia.video_ms.application.gateways.VideoGateway;
 import org.cognitia.video_ms.domain.model.Video;
 import org.cognitia.video_ms.infra.dto.video.DeleteVideoRequestDto;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class VideoRepositoryGateway implements VideoGateway {
 
@@ -24,10 +26,10 @@ public class VideoRepositoryGateway implements VideoGateway {
     }
 
     @Override
-    public void upload(Video video) {
+    public Long upload(Video video) {
         var videoEntity = videoMapper.toEntity(video);
 
-        videoJpaRepository.save(videoEntity);
+        return videoJpaRepository.save(videoEntity).getId();
     }
 
     @Override
@@ -109,5 +111,17 @@ public class VideoRepositoryGateway implements VideoGateway {
                         v
                 )
         ).toList();
+    }
+
+    @Override
+    public void deleteVideoByPath(Long path) {
+        var video = videoJpaRepository.getByPath(path);
+
+        video.forEach(
+                v -> {
+                    log.info("Deleting video with path: " + path);
+                    videoJpaRepository.delete(v);
+                }
+        );
     }
 }

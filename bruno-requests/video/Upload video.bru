@@ -11,6 +11,6 @@ post {
 }
 
 body:multipart-form {
-  data: {"title":"Introdução ao Java","description":"Este vídeo apresenta os conceitos básicos da linguagem Java.","path":1,"skill":"Programação","courseId":98765} @contentType(application/json)
+  data: {"title":"Introdução ao Java","description":"Este vídeo apresenta os conceitos básicos da linguagem Java.","path":1,"skill":"Programação","courseId":98765, "authorId": "aaa"} @contentType(application/json)
   video: @file(/home/furqas/Downloads/videoplayback.mp4)
 }
