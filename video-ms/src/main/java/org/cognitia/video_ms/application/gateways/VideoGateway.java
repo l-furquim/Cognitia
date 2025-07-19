@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface VideoGateway {
 
-    Long upload(Video video);
+    Video upload(Video video);
     Video findById(Long id);
     void uploadThumb(Long videoId, String thumbUrl);
     void delete(DeleteVideoRequestDto deleteVideoRequestDto);

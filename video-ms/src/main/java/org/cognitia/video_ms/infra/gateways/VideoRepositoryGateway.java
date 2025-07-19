@@ -26,10 +26,10 @@ public class VideoRepositoryGateway implements VideoGateway {
     }
 
     @Override
-    public Long upload(Video video) {
+    public Video upload(Video video) {
         var videoEntity = videoMapper.toEntity(video);
 
-        return videoJpaRepository.save(videoEntity).getId();
+        return videoMapper.toDomain(videoJpaRepository.save(videoEntity));
     }
 
     @Override

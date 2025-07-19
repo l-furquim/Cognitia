@@ -5,7 +5,7 @@ import org.cognitia.video_ms.application.gateways.VideoGateway;
 import org.cognitia.video_ms.domain.model.Video;
 import org.cognitia.video_ms.domain.exceptions.*;
 import org.cognitia.video_ms.infra.dto.video.*;
-import org.cognitia.video_ms.utils.FileUtils;
+import org.cognitia.video_ms.utils.VideoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -13,7 +13,9 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class VideoUseCase {
@@ -21,69 +23,60 @@ public class VideoUseCase {
     private static final Logger log = LoggerFactory.getLogger(VideoUseCase.class);
     private final VideoGateway videoGateway;
     private final S3Gateway s3Gateway;
-    private final FileUtils fileUtils;
+    private final VideoUtils videoUtils;
     private static final String TOPIC = "path.add";
 
     public VideoUseCase
             (
             VideoGateway videoGateway,
             S3Gateway s3Gateway,
-            FileUtils fileUtils
+            VideoUtils videoUtils
             ){
         this.videoGateway = videoGateway;
         this.s3Gateway = s3Gateway;
-        this.fileUtils = fileUtils;
+        this.videoUtils = videoUtils;
     }
     @CacheEvict(value= "videos",key = "#uploadVideoRequest.metadata().courseId()", allEntries = true)
     public UploadVideoResponse uploadVideo(UploadVideoRequest uploadVideoRequest){
         VideoMetadataDto metadata = uploadVideoRequest.metadata();
 
-        if(
-                metadata.courseId() == null || metadata.courseId() < 0 ||
-                metadata.title() == null || metadata.title().isEmpty() ||
-                metadata.description() == null || metadata.description().isEmpty() ||
-                metadata.path() == null || metadata.skill() == null || metadata.skill().isEmpty()
-        ){
-            throw new InvalidVideoUploadException("Invalid data for video upload");
-        }
+        validateUploadRequest(metadata);
 
-//        if(!uploadVideoRequest.video().getContentType().equals(".mp4")){
-//            throw new InvalidVideoContentTypeException("Invalid video extension, we only support mp4");
-//        }
+        // tmp file
+        File videoPath = videoUtils.convertToTempFile(uploadVideoRequest.video());
+        Double duration = videoUtils.getVideoDurationInMinutes(videoPath);
 
-        // validar se o autor existe
+        String originalFilename = uploadVideoRequest.video().getOriginalFilename();
+        String videoName = sanitizeVideoName(originalFilename);
 
-        var videoPath = fileUtils.convertToFile(uploadVideoRequest.video());
+        log.info("Processing video: {} with duration: {} minutes", videoName, duration);
 
-        Double duration = fileUtils.getVideoDurationInMinutes(videoPath);
+        CompletableFuture.runAsync(() -> {
+            try {
+                processVideoWithMultipleQualities(videoPath, metadata.courseId(), videoName);
+            } catch (Exception e) {
+                log.error("Error processing video {}: {}", videoName, e.getMessage(), e);
+            }
+        });
 
+        String videoUrl = s3Gateway.getUrlByPrefix(metadata.courseId() + "/" + videoName + "/master.m3u8");
+        String thumbnailUrl = s3Gateway.getUrlByPrefix(metadata.courseId() + "/" + videoName + "/thumbnail.jpg");
 
-        log.info("Video path atual " + videoPath);
-        log.info("Duracao atual " + duration);
-
-        new Thread(() -> {
-            var mpegPath = fileUtils.convertToMpegDash(videoPath.toPath());
-
-            log.info("Video converted to mpeg dash " + mpegPath);
-
-            s3Gateway.uploadVideoToBucket(mpegPath, uploadVideoRequest.metadata().courseId(), uploadVideoRequest.video().getOriginalFilename());
-        }).start();
-
-        var url = s3Gateway.getUrlByPrefix(metadata.courseId() + "/" + uploadVideoRequest.video().getOriginalFilename());
-
-        var video = new Video(
+        Video video = new Video(
                 metadata.title(),
                 metadata.description(),
-                uploadVideoRequest.video().getOriginalFilename(),
+                videoName,
                 metadata.path(),
                 metadata.skill(),
                 duration,
-                url,
-                null,
+                videoUrl,
+                thumbnailUrl,
                 metadata.courseId()
         );
 
-        return new UploadVideoResponse(video);
+        Video savedVideo = videoGateway.upload(video);
+
+        return new UploadVideoResponse(savedVideo);
     }
     @CachePut(value = "videos", key = "metadata.videoId()")
     public UploadVideoThumbResponse uploadVideoThumb(UploadVideoThumbRequest request){
@@ -148,6 +141,39 @@ public class VideoUseCase {
         }
 
         return videoGateway.getByPath(pathId);
+    }
+
+    private String sanitizeVideoName(String originalFilename) {
+        if (originalFilename == null) {
+            return "video_" + System.currentTimeMillis();
+        }
+
+        // Remove extension and sanitize
+        String baseName = originalFilename.substring(0, originalFilename.lastIndexOf('.'));
+        return baseName.replaceAll("[^a-zA-Z0-9._-]", "_").toLowerCase();
+    }
+
+    private void processVideoWithMultipleQualities(File videoPath, Long courseId, String videoName) {
+        try {
+            VideoProcessingResult result = videoUtils.convertToMpegDashWithQualities(videoPath.toPath());
+
+            s3Gateway.uploadVideoProcessingResult(result, courseId, videoName);
+
+            log.info("Successfully processed and uploaded video with qualities: {}", videoName);
+
+        } catch (Exception e) {
+            log.error("Error processing video {}: {}", videoName, e.getMessage(), e);
+        }
+    }
+
+    private void validateUploadRequest(VideoMetadataDto metadata) {
+        if (metadata.courseId() == null || metadata.courseId() < 0 ||
+                metadata.title() == null || metadata.title().isEmpty() ||
+                metadata.description() == null || metadata.description().isEmpty() ||
+                metadata.path() == null || metadata.skill() == null || metadata.skill().isEmpty()) {
+
+            throw new InvalidVideoUploadException("Invalid data for video upload");
+        }
     }
 
 }
