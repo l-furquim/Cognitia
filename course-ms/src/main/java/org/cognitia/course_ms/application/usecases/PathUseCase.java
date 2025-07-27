@@ -2,7 +2,7 @@ package org.cognitia.course_ms.application.usecases;
 
 import lombok.extern.slf4j.Slf4j;
 import org.cognitia.course_ms.application.gateways.PathGateway;
-import org.cognitia.course_ms.application.gateways.VideoGateway;
+import org.cognitia.course_ms.application.gateways.LessonGateway;
 import org.cognitia.course_ms.domain.path.Path;
 import org.cognitia.course_ms.domain.path.dto.*;
 import org.cognitia.course_ms.domain.path.exceptions.InvalidCreatePathRequest;
@@ -19,10 +19,10 @@ public class PathUseCase {
 
     private static final String TOPIC = "video.path.delete";
     private final PathGateway pathGateway;
-    private final VideoGateway videoGateway;
+    private final LessonGateway videoGateway;
     private final KafkaTemplate<String, DeleteVideoPathsRequest> deleteVideoTemplate;
 
-    public PathUseCase(PathGateway pathGateway, VideoGateway videoGateway, KafkaTemplate<String, DeleteVideoPathsRequest> deleteVideoTemplate) {
+    public PathUseCase(PathGateway pathGateway, LessonGateway videoGateway, KafkaTemplate<String, DeleteVideoPathsRequest> deleteVideoTemplate) {
         this.pathGateway = pathGateway;
         this.videoGateway = videoGateway;
         this.deleteVideoTemplate = deleteVideoTemplate;
